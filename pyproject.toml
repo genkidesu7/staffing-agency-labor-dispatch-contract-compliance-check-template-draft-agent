@@ -1,0 +1,46 @@
+[project]
+name = "svc-c2-047"
+version = "0.1.0"
+description = "Staffing agency 労働者派遣法 contract compliance check and clause template draft agent"
+requires-python = ">=3.11"
+# The framework (agenticstar-agentcore) is NOT a public-PyPI dependency; it is
+# provided by CI, either via a local import path or installed from the package
+# registry depending on the CI job. Pinning it here would make `pip install -e .`
+# fail because it is not resolvable from the default index.
+dependencies = [
+    "agenticstar-agentcore[marketplace,openai]==1.0.3",]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.3",
+    "pytest-cov==5.0.0",
+    "pytest-asyncio==1.4.0",
+    "httpx==0.28.1",
+    "ruff==0.4.4",
+    "mypy==1.10.0",
+]
+
+[build-system]
+requires = ["setuptools==68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[[tool.mypy.overrides]]
+# framework/ and shared/ ship without a py.typed marker (CI-provided packages,
+# see the dependencies note above), so mypy treats every export as Any.
+module = ["framework.*", "shared.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Domain code subclasses framework base classes (FunctionNode, AgentBaseGraph,
+# AgentState) that resolve to Any per the override above — strict mode's
+# disallow_subclassing_any would otherwise flag every node/graph/state class.
+module = ["src.nodes.*", "src.graph.*", "src.schemas.*"]
+disallow_subclassing_any = false
